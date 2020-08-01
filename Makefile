@@ -2,7 +2,7 @@ GLFW_PATH=/usr/local/Cellar/glfw/3.3.2/
 GLM_PATH=/usr/local/Cellar/glm/0.9.9.5/
 
 SRC= \
-src/main.c \
+src/main.cpp \
 src/glad.c
 
 INCLUDES= \
@@ -21,7 +21,7 @@ BINOUT=go-go-opengl
 
 .PHONY: all
 all:
-	clang ${CFLAGS} ${INCLUDES} ${SRC} ${LD_FLAGS} -o ${BINOUT}
+	clang++ -std=c++14 ${CFLAGS} ${INCLUDES} ${SRC} ${LD_FLAGS} -o ${BINOUT}
 
 .PHONY: clean
 clean:

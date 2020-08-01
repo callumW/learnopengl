@@ -3,6 +3,8 @@
 
 #include <iostream>
 
+#include "utils.h"
+
 void framebuffer_size_callback(GLFWwindow* window, int width, int height)
 {
     std::cout << "window resize!" << std::endl;
@@ -42,18 +44,19 @@ int main(void)
     glViewport(0, 0, 800, 600);
     glfwSetFramebufferSizeCallback(window, framebuffer_size_callback);
 
-    const char *vertexShaderSource = "#version 330 core\n"
-    "layout (location = 0) in vec3 aPos;\n"
-    "void main()\n"
-    "{\n"
-    "   gl_Position = vec4(aPos.x, aPos.y, aPos.z, 1.0);\n"
-    "}\0";
+    const char *vertexShaderSource = load_shader_code("src/shaders/triangle.vert");
+
+    if (vertexShaderSource == nullptr) {
+        std::cout << "Failed to load vertex shader" << std::endl;
+        return 1;
+    }
 
     unsigned int vertexShader;
     vertexShader = glCreateShader(GL_VERTEX_SHADER);
 
     glShaderSource(vertexShader, 1, &vertexShaderSource, NULL);
     glCompileShader(vertexShader);
+    delete vertexShaderSource;
 
     /** Check if successful **/
     int  success;
@@ -66,17 +69,18 @@ int main(void)
         std::cout << "ERROR::SHADER::VERTEX::COMPILATION_FAILED\n" << infoLog << std::endl;
     }
 
-    const char *fragmentShaderSource = "#version 330 core\n"
-    "out vec4 FragColor;\n"
-    "void main()\n"
-    "{\n"
-        "FragColor = vec4(1.0f, 0.5f, 0.2f, 1.0f);\n"
-    "}\0";
+    const char *fragmentShaderSource = load_shader_code("src/shaders/triangle.frag");
+
+    if (fragmentShaderSource == nullptr) {
+        std::cout << "Failed to load fragment shader" << std::endl;
+        return 1;
+    }
 
     unsigned int fragmentShader;
     fragmentShader = glCreateShader(GL_FRAGMENT_SHADER);
     glShaderSource(fragmentShader, 1, &fragmentShaderSource, NULL);
     glCompileShader(fragmentShader);
+    delete fragmentShaderSource;
 
     glGetShaderiv(fragmentShader, GL_COMPILE_STATUS, &success);
 

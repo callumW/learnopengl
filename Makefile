@@ -3,7 +3,8 @@ GLM_PATH=/usr/local/Cellar/glm/0.9.9.5/
 
 SRC= \
 src/main.cpp \
-src/glad.c
+src/glad.c \
+src/utils.cpp
 
 INCLUDES= \
 -Iinclude \

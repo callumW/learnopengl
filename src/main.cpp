@@ -226,6 +226,10 @@ int main(void)
         glm::vec3(-1.3f,  1.0f, -1.5f)
     };
 
+    glm::mat4 projection = glm::mat4(1.0f);
+    projection =
+        glm::perspective(glm::radians(45.0f), (float)SCR_WIDTH / (float)SCR_HEIGHT, 0.1f, 100.0f);
+
     while(!glfwWindowShouldClose(window))
     {
         process_input(window);
@@ -243,14 +247,10 @@ int main(void)
         triangle_shader.use();
 
         // create transformations
-        glm::mat4 view          = glm::mat4(1.0f);
-        glm::mat4 projection    = glm::mat4(1.0f);
-        view  = glm::translate(view, glm::vec3(0.0f, 0.0f, -3.0f));
-        projection = glm::perspective(glm::radians(45.0f), (float)SCR_WIDTH / (float)SCR_HEIGHT, 0.1f, 100.0f);
-        unsigned int viewLoc  = glGetUniformLocation(triangle_shader.ID, "view");
-        // pass them to the shaders (3 different ways)
-        glUniformMatrix4fv(viewLoc, 1, GL_FALSE, &view[0][0]);
-        // note: currently we set the projection matrix each frame, but since the projection matrix rarely changes it's often best practice to set it outside the main loop only once.
+        glm::mat4 view = glm::mat4(1.0f);
+        view = glm::translate(view, glm::vec3(0.0f, 0.0f, -3.0f));
+
+        triangle_shader.setMat4("view", view);
         triangle_shader.setMat4("projection", projection);
 
 

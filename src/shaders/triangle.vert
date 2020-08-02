@@ -6,6 +6,7 @@ out vec3 vertexColor;
 
 void main()
 {
-    gl_Position = vec4(aPos, 1.0);
+    vec3 inverted_pos = vec3(aPos.x, 0 - aPos.y, aPos.z);
+    gl_Position = vec4(inverted_pos, 1.0);
     vertexColor = aColor;
 }

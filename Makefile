@@ -5,7 +5,8 @@ SRC= \
 src/main.cpp \
 src/glad.c \
 src/utils.cpp \
-src/Shader.cpp
+src/Shader.cpp \
+src/Camera.cpp
 
 INCLUDES= \
 -Iinclude \

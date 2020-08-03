@@ -9,6 +9,7 @@
 
 #include "utils.h"
 #include "Shader.h"
+#include "Camera.h"
 
 #define STB_IMAGE_IMPLEMENTATION
 #include "stb_image.h"
@@ -32,6 +33,8 @@ bool firstMouse = true;
 
 float fov = 45.0f;
 
+Camera camera = {};
+
 void framebuffer_size_callback(GLFWwindow* window, int width, int height)
 {
     std::cout << "window resize!" << std::endl;
@@ -44,15 +47,30 @@ void process_input(GLFWwindow* window)
         glfwSetWindowShouldClose(window, true);
     }
 
+    glm::vec3 movement_dir{0.0f, 0.0f, 0.0f};
+    bool moved = false;
     const float cameraSpeed = 0.05f; // adjust accordingly
-    if (glfwGetKey(window, GLFW_KEY_W) == GLFW_PRESS)
-        cameraPos += cameraSpeed * cameraFront;
-    if (glfwGetKey(window, GLFW_KEY_S) == GLFW_PRESS)
-        cameraPos -= cameraSpeed * cameraFront;
-    if (glfwGetKey(window, GLFW_KEY_A) == GLFW_PRESS)
-        cameraPos -= glm::normalize(glm::cross(cameraFront, cameraUp)) * cameraSpeed;
-    if (glfwGetKey(window, GLFW_KEY_D) == GLFW_PRESS)
-        cameraPos += glm::normalize(glm::cross(cameraFront, cameraUp)) * cameraSpeed;
+    if (glfwGetKey(window, GLFW_KEY_W) == GLFW_PRESS) {
+        movement_dir.z = 1.0f;
+        moved = true;
+    }
+    else if (glfwGetKey(window, GLFW_KEY_S) == GLFW_PRESS) {
+        movement_dir.z = -1.0f;
+        moved = true;
+    }
+
+    if (glfwGetKey(window, GLFW_KEY_A) == GLFW_PRESS) {
+        movement_dir.x = -1.0f;
+        moved = true;
+    }
+    else if (glfwGetKey(window, GLFW_KEY_D) == GLFW_PRESS) {
+        movement_dir.x = 1.0f;
+        moved = true;
+    }
+
+    if (moved) {
+        camera.move(movement_dir, 0.016);    // pretend it's 60fps for now
+    }
 }
 
 void mouse_callback(GLFWwindow* window, double xpos, double ypos)
@@ -69,34 +87,12 @@ void mouse_callback(GLFWwindow* window, double xpos, double ypos)
     lastX = xpos;
     lastY = ypos;
 
-    float sensitivity = 0.1f;
-    xoffset *= sensitivity;
-    yoffset *= sensitivity;
-
-    yaw   += xoffset;
-    pitch += yoffset;
-
-    if(pitch > 89.0f)
-        pitch = 89.0f;
-    if(pitch < -89.0f)
-        pitch = -89.0f;
-
-    glm::vec3 direction;
-    direction.x = cos(glm::radians(yaw)) * cos(glm::radians(pitch));
-    direction.y = sin(glm::radians(pitch));
-    direction.z = sin(glm::radians(yaw)) * cos(glm::radians(pitch));
-    cameraFront = glm::normalize(direction);
+    camera.add_mouse_input(xoffset, yoffset);
 }
 
 void scroll_callback(GLFWwindow* window, double xoffset, double yoffset)
 {
-    std::cout << "scroll!" << std::endl;
-
-    fov -= (float)yoffset;
-    if (fov < 1.0f)
-        fov = 1.0f;
-    if (fov > 45.0f)
-        fov = 45.0f;
+    camera.add_mouse_scroll(static_cast<float>(yoffset));
 }
 
 int main(void)
@@ -300,7 +296,7 @@ int main(void)
 
     glm::mat4 projection = glm::mat4(1.0f);
     projection =
-        glm::perspective(glm::radians(fov), (float)SCR_WIDTH / (float)SCR_HEIGHT, 0.1f, 100.0f);
+        glm::perspective(glm::radians(camera.fov), (float)SCR_WIDTH / (float)SCR_HEIGHT, 0.1f, 100.0f);
 
     while(!glfwWindowShouldClose(window))
     {
@@ -319,10 +315,10 @@ int main(void)
         triangle_shader.use();
 
         projection =
-            glm::perspective(glm::radians(fov), (float)SCR_WIDTH / (float)SCR_HEIGHT, 0.1f, 100.0f);
+            glm::perspective(glm::radians(camera.fov), (float)SCR_WIDTH / (float)SCR_HEIGHT, 0.1f, 100.0f);
 
         // camera/view transformation
-        glm::mat4 view = glm::lookAt(cameraPos, cameraPos + cameraFront, cameraUp);
+        glm::mat4 view = camera.view();
 
         triangle_shader.setMat4("view", view);
         triangle_shader.setMat4("projection", projection);

@@ -323,6 +323,9 @@ int main(void)
         triangle_shader.setMat4("view", view);
         triangle_shader.setMat4("projection", projection);
 
+        triangle_shader.setVec3("pulse_position", glm::vec3(1.0f, 1.0f, 1.0f));
+        triangle_shader.setFloat("pulse_radius", 5.0f);
+
 
         glBindVertexArray(VAO); // seeing as we only have a single VAO there's no need to bind it
                                 // every time, but we'll do so to keep things a bit more organized
@@ -333,6 +336,7 @@ int main(void)
             float angle = 20.0f * (i + 1) * (float)glfwGetTime();
             model = glm::rotate(model, glm::radians(angle), glm::vec3(1.0f, 0.3f, 0.5f));
             triangle_shader.setMat4("model", model);
+            triangle_shader.setVec3("world_pos", cubePositions[i]);
 
             glDrawArrays(GL_TRIANGLES, 0, 36);
         }

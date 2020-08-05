@@ -227,6 +227,8 @@ int main(void)
     projection =
         glm::perspective(glm::radians(camera.fov), (float)SCR_WIDTH / (float)SCR_HEIGHT, 0.1f, 100.0f);
 
+        glm::vec3 light_position(1.2f, 1.0f, 2.0f);
+
     while(!glfwWindowShouldClose(window))
     {
         process_input(window);
@@ -265,7 +267,7 @@ int main(void)
         glBindVertexArray(lighting_VAO);
         {
             glm::mat4 model = glm::mat4(1.0f);
-            model = glm::translate(model, cubePositions[1]);
+            model = glm::translate(model, light_position);
             light_source_shader.setMat4("model", model);
 
             glDrawArrays(GL_TRIANGLES, 0, 36);

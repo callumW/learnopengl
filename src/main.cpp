@@ -132,7 +132,8 @@ int main(void)
     glfwSetCursorPosCallback(window, mouse_callback);
     glfwSetScrollCallback(window, scroll_callback);
 
-    Shader triangle_shader{"src/shaders/lighting.vs", "src/shaders/lighting.fs"};
+    Shader object_shader{"src/shaders/lighting.vs", "src/shaders/lighting.fs"};
+    Shader light_source_shader{"src/shaders/light_source.vs", "src/shaders/light_source.fs"};
 
     // Cube
     float vertices[] = {
@@ -178,15 +179,10 @@ int main(void)
         -0.5f,  0.5f,  0.5f,
         -0.5f,  0.5f, -0.5f
     };
-    unsigned int indices[] = {
-        0, 1, 3, // first triangle
-        1, 2, 3  // second triangle
-    };
 
-    unsigned int VAO, VBO, EBO;
+    unsigned int VAO, VBO;
     glGenVertexArrays(1, &VAO);
     glGenBuffers(1, &VBO);
-    glGenBuffers(1, &EBO);
 
     // bind the Vertex Array Object first, then bind and set vertex buffer(s), and then configure
     // vertex attributes(s).
@@ -195,9 +191,6 @@ int main(void)
 
     glBindBuffer(GL_ARRAY_BUFFER, VBO);
     glBufferData(GL_ARRAY_BUFFER, sizeof(vertices), vertices, GL_STATIC_DRAW);
-
-    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, EBO);
-    glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(indices), indices, GL_STATIC_DRAW);
 
     // location 0 is the vertex pos
     glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(float), (void*)0);
@@ -214,21 +207,20 @@ int main(void)
     glBindVertexArray(0);
     // Stopped recording our actions
 
+    unsigned int lighting_VAO;
+    glGenVertexArrays(1, &lighting_VAO);
+    glBindVertexArray(lighting_VAO);
+    glBindBuffer(GL_ARRAY_BUFFER, VBO);
+    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(float), (void*)0);
+    glEnableVertexAttribArray(0);
+
     // uncomment this call to draw in wireframe polygons.
     // glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
     glEnable(GL_DEPTH_TEST);
 
     glm::vec3 cubePositions[] = {
         glm::vec3( 0.0f,  0.0f,  0.0f),
-        glm::vec3( 2.0f,  5.0f, -15.0f),
-        glm::vec3(-1.5f, -2.2f, -2.5f),
-        glm::vec3(-3.8f, -2.0f, -12.3f),
-        glm::vec3( 2.4f, -0.4f, -3.5f),
-        glm::vec3(-1.7f,  3.0f, -7.5f),
-        glm::vec3( 1.3f, -2.0f, -2.5f),
-        glm::vec3( 1.5f,  2.0f, -2.5f),
-        glm::vec3( 1.5f,  0.2f, -1.5f),
-        glm::vec3(-1.3f,  1.0f, -1.5f)
+        glm::vec3( 2.0f,  5.0f, -15.0f)
     };
 
     glm::mat4 projection = glm::mat4(1.0f);
@@ -242,7 +234,9 @@ int main(void)
         glClearColor(0.2f, 0.3f, 0.3f, 1.0f);
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
-        triangle_shader.use();
+        object_shader.use();
+        object_shader.setVec3("objectColor", 1.0f, 0.5f, 0.31f);
+        object_shader.setVec3("lightColor",  1.0f, 1.0f, 1.0f);
 
         projection =
             glm::perspective(glm::radians(camera.fov), (float)SCR_WIDTH / (float)SCR_HEIGHT, 0.1f, 100.0f);
@@ -250,24 +244,32 @@ int main(void)
         // camera/view transformation
         glm::mat4 view = camera.view();
 
-        triangle_shader.setMat4("view", view);
-        triangle_shader.setMat4("projection", projection);
+        object_shader.setMat4("view", view);
+        object_shader.setMat4("projection", projection);
 
 
         glBindVertexArray(VAO); // seeing as we only have a single VAO there's no need to bind it
                                 // every time, but we'll do so to keep things a bit more organized
-        for(unsigned int i = 0; i < 10; i++)
         {
             glm::mat4 model = glm::mat4(1.0f);
-            model = glm::translate(model, cubePositions[i]);
-            float angle = 20.0f * (i + 1) * (float)glfwGetTime();
-            model = glm::rotate(model, glm::radians(angle), glm::vec3(1.0f, 0.3f, 0.5f));
-            triangle_shader.setMat4("model", model);
+            model = glm::translate(model, cubePositions[0]);
+            object_shader.setMat4("model", model);
 
             glDrawArrays(GL_TRIANGLES, 0, 36);
         }
-        // glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
         // glBindVertexArray(0); // no need to unbind it every time
+
+        light_source_shader.use();
+        light_source_shader.setMat4("view", view);
+        light_source_shader.setMat4("projection", projection);
+        glBindVertexArray(lighting_VAO);
+        {
+            glm::mat4 model = glm::mat4(1.0f);
+            model = glm::translate(model, cubePositions[1]);
+            light_source_shader.setMat4("model", model);
+
+            glDrawArrays(GL_TRIANGLES, 0, 36);
+        }
 
         glfwSwapBuffers(window);
         glfwPollEvents();
@@ -275,9 +277,9 @@ int main(void)
 
     // optional: de-allocate all resources once they've outlived their purpose:
     // ------------------------------------------------------------------------
-    glDeleteBuffers(1, &EBO);
     glDeleteVertexArrays(1, &VAO);
     glDeleteBuffers(1, &VBO);
+    glDeleteVertexArrays(1, &lighting_VAO);
 
     glfwTerminate();
     return 0;

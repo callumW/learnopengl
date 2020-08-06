@@ -1,16 +1,19 @@
 #version 330 core
 out vec4 FragColor;
 
-in vec3 ourColor;
-in vec2 TexCoord;
+/*
+    Get out frag coords in screen we're used too, i.e. origin at top left with x increasing to right
+    and y increasing down screen.
+*/
+layout(origin_upper_left) in vec4 gl_FragCoord;
+
 in float colorStrength;
 
-uniform sampler2D texture1;
-uniform sampler2D texture2;
+uniform vec2 pulse_location;
 
 void main()
 {
-    FragColor = mix(texture(texture1, TexCoord), texture(texture2, vec2(0 - TexCoord.x, TexCoord.y)), 0.2);
-    vec4 bg_color = vec4(0.2f, 0.3f, 0.3f, 1.0f);
-    FragColor = mix(bg_color, FragColor, colorStrength);
+    float dist = length(pulse_location - gl_FragCoord.xy);
+    float color = dist / 100;
+    FragColor = vec4(color);
 }

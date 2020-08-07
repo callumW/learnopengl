@@ -95,12 +95,19 @@ void scroll_callback(GLFWwindow* window, double xoffset, double yoffset)
     camera.add_mouse_scroll(static_cast<float>(yoffset));
 }
 
+void error_callback(int err, char const* err_str)
+{
+    std::cout << "GLFW error: " << err_str << std::endl;
+}
+
 int main(void)
 {
     glfwInit();
+    glfwSetErrorCallback(error_callback);
     glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3);
     glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 3);
     glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
+    glfwWindowHint(GLFW_FOCUSED, GLFW_TRUE);
 
 #ifdef __APPLE__
     glfwWindowHint(GLFW_OPENGL_FORWARD_COMPAT, GL_TRUE);
@@ -128,6 +135,7 @@ int main(void)
     glViewport(0, 0, 800, 600);
     glfwSetFramebufferSizeCallback(window, framebuffer_size_callback);
 
+    glfwSetCursorPos(window, lastX, lastY);     // TODO this isn't really working :(
     glfwSetCursorPosCallback(window, mouse_callback);
     glfwSetScrollCallback(window, scroll_callback);
 
@@ -186,6 +194,7 @@ int main(void)
 
         triangle_shader.use();
         triangle_shader.setVec2("pulse_location", glm::vec2(lastX, lastY));
+        triangle_shader.setFloat("pulse_radius", 50.0f);
 
         glBindVertexArray(VAO); // seeing as we only have a single VAO there's no need to bind it
                                 // every time, but we'll do so to keep things a bit more organized

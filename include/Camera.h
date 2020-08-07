@@ -26,6 +26,8 @@ public:
 
     void add_mouse_scroll(float y_offset);
 
+    glm::vec3 const& get_position() const {return position;}
+
     float fov = DEFAULT_FOV;
     float movement_speed = DEFAULT_SPEED;
     float mouse_sensitivity = DEFAULT_MOUSE_SENSITIVITY;

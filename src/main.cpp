@@ -68,6 +68,15 @@ void process_input(GLFWwindow* window)
         moved = true;
     }
 
+    if (glfwGetKey(window, GLFW_KEY_Q) == GLFW_PRESS) {
+        movement_dir.y = 1.0f;
+        moved = true;
+    }
+    else if (glfwGetKey(window, GLFW_KEY_E) == GLFW_PRESS) {
+        movement_dir.y = -1.0f;
+        moved = true;
+    }
+
     if (moved) {
         camera.move(movement_dir, 0.016);    // pretend it's 60fps for now
     }

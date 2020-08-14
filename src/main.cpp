@@ -237,6 +237,7 @@ int main(void)
     glEnable(GL_DEPTH_TEST);
 
     unsigned int diffuseMap = loadTexture("images/crate.png");
+    unsigned int specularMap = loadTexture("images/crate_specular_map.png");
 
     glm::vec3 cubePositions[] = {
         glm::vec3( 0.0f,  0.0f,  0.0f),
@@ -261,6 +262,10 @@ int main(void)
         object_shader.setInt("material.diffuse", 0);
         glActiveTexture(GL_TEXTURE0);
         glBindTexture(GL_TEXTURE_2D, diffuseMap);
+
+        object_shader.setInt("material.specular", 1);
+        glActiveTexture(GL_TEXTURE1);
+        glBindTexture(GL_TEXTURE_2D, specularMap);
 
         object_shader.setVec3("material.specular", 0.5f, 0.5f, 0.5f);
         object_shader.setFloat("material.shininess", 32.0f);

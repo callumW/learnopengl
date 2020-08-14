@@ -73,7 +73,7 @@ void process_input(GLFWwindow* window)
         moved = true;
     }
     else if (glfwGetKey(window, GLFW_KEY_E) == GLFW_PRESS) {
-        movement_dir.y = -1.0f;
+        movement_dir.y = - 1.0f;
         moved = true;
     }
 
@@ -250,9 +250,16 @@ int main(void)
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
         object_shader.use();
-        object_shader.setVec3("objectColor", 1.0f, 0.5f, 0.31f);
-        object_shader.setVec3("lightColor",  1.0f, 1.0f, 1.0f);
+        object_shader.setVec3("material.ambient", 1.0f, 0.5f, 0.31f);
+        object_shader.setVec3("material.diffuse", 1.0f, 0.5f, 0.31f);
+        object_shader.setVec3("material.specular", 0.5f, 0.5f, 0.5f);
+        object_shader.setFloat("material.shininess", 32.0f);
+
+        object_shader.setVec3("light.ambient",  0.2f, 0.2f, 0.2f);
+        object_shader.setVec3("light.diffuse",  0.5f, 0.5f, 0.5f); // darken diffuse light a bit
+        object_shader.setVec3("light.specular", 1.0f, 1.0f, 1.0f);
         object_shader.setVec3("lightPos", light_position);
+
         object_shader.setVec3("viewPos", camera.get_position());
 
         projection =
